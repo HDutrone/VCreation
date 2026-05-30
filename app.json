@@ -19,6 +19,9 @@
       },
       "package": "cd.vcreations.app"
     },
+    "web": {
+      "bundler": "metro"
+    },
     "extra": {
       "whatsappNumber": "243810000000"
     }
