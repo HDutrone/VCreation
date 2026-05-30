@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "V Créations",
+    "slug": "vcreations",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0D0D0D",
+    "splash": {
+      "backgroundColor": "#0D0D0D"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "cd.vcreations.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0D0D0D"
+      },
+      "package": "cd.vcreations.app"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "extra": {
+      "whatsappNumber": "243810000000"
+    }
+  }
+}
