@@ -4,10 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/product_model.dart';
 
 class ProductsProvider extends ChangeNotifier {
-  static const _kExtrasKey = 'vc_products_extras_v1';
-  static const _kStatesKey = 'vc_products_states_v1';
-
-  static const _seededIds = {'p1', 'p2', 'p3', 'p4', 'p5'};
+  // Single key stores ALL products (seeded + admin-added) with full data.
+  // v2 intentionally differs from old keys so stale partial data is ignored.
+  static const _kAllProductsKey = 'vc_all_products_v2';
 
   final List<ProductModel> _products = [
     const ProductModel(
@@ -122,43 +121,26 @@ class ProductsProvider extends ChangeNotifier {
 
   Future<void> loadSaved() async {
     final prefs = await SharedPreferences.getInstance();
-
-    // Restore isActive states for all products (including seeded)
-    final statesJson = prefs.getString(_kStatesKey);
-    if (statesJson != null) {
-      final states = json.decode(statesJson) as Map<String, dynamic>;
-      for (int i = 0; i < _products.length; i++) {
-        final active = states[_products[i].id];
-        if (active is bool) {
-          _products[i] = _products[i].copyWith(isActive: active);
-        }
+    final allJson = prefs.getString(_kAllProductsKey);
+    if (allJson != null) {
+      try {
+        final list = json.decode(allJson) as List;
+        _products
+          ..clear()
+          ..addAll(list.map((j) => ProductModel.fromJson(j as Map<String, dynamic>)));
+      } catch (_) {
+        // Parsing failed — keep the hardcoded seeds as fallback.
       }
     }
-
-    // Load admin-added (non-seeded) products
-    final extrasJson = prefs.getString(_kExtrasKey);
-    if (extrasJson != null) {
-      final list = json.decode(extrasJson) as List;
-      for (final j in list) {
-        final p = ProductModel.fromJson(j as Map<String, dynamic>);
-        if (!_products.any((existing) => existing.id == p.id)) {
-          _products.add(p);
-        }
-      }
-    }
-
     notifyListeners();
   }
 
   Future<void> _save() async {
     final prefs = await SharedPreferences.getInstance();
-    final states = <String, bool>{for (final p in _products) p.id: p.isActive};
-    await prefs.setString(_kStatesKey, json.encode(states));
-    final extras = _products
-        .where((p) => !_seededIds.contains(p.id))
-        .map((p) => p.toJson())
-        .toList();
-    await prefs.setString(_kExtrasKey, json.encode(extras));
+    await prefs.setString(
+      _kAllProductsKey,
+      json.encode(_products.map((p) => p.toJson()).toList()),
+    );
   }
 
   void toggleFavorite(String productId) {
@@ -179,7 +161,7 @@ class ProductsProvider extends ChangeNotifier {
   }
 
   void addProduct(ProductModel product) {
-    _products.add(product);
+    _products.insert(0, product); // newest first → becomes hero on home screen
     notifyListeners();
     _save();
   }
