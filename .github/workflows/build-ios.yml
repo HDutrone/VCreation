@@ -21,8 +21,8 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Generate iOS platform files
-        run: flutter create --platforms ios --project-name vcreations .
+      - name: Generate platform files (android + ios dirs needed for launcher icons)
+        run: flutter create --platforms android,ios --project-name vcreations .
 
       - name: Configure iOS app name and permissions
         run: |
