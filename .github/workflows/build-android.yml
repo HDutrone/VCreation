@@ -67,8 +67,18 @@ jobs:
       - name: Fix app name
         run: |
           STRINGS=android/app/src/main/res/values/strings.xml
-          sed -i 's|<string name="app_name">vcreations</string>|<string name="app_name">V Créations</string>|' "$STRINGS"
-          echo "App name updated:"
+          mkdir -p "$(dirname "$STRINGS")"
+          if [ -f "$STRINGS" ]; then
+            sed -i 's|<string name="app_name">vcreations</string>|<string name="app_name">V Créations</string>|' "$STRINGS"
+          else
+            cat > "$STRINGS" << 'XML'
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">V Créations</string>
+</resources>
+XML
+          fi
+          echo "strings.xml:"
           cat "$STRINGS"
 
       - name: Install dependencies
