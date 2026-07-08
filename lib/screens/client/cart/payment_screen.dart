@@ -56,7 +56,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ? cart.items.map((i) => i.product.name).join(', ')
         : 'Création V';
     final ref = orders.addOrder(
-      clientName: auth.user?.displayName ?? 'Client',
+      clientName: auth.user?.name ?? 'Client',
       productName: productName,
       paymentMethod: _method,
     );

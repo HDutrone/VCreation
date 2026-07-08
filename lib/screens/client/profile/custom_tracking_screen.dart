@@ -13,7 +13,7 @@ class CustomTrackingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider>();
     final requests = context.watch<OrdersProvider>()
-        .clientRequests(auth.user?.displayName ?? '');
+        .clientRequests(auth.user?.name ?? '');
 
     return Scaffold(
       backgroundColor: AppColors.background,

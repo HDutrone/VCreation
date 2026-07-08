@@ -12,7 +12,7 @@ class OrdersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider>();
     final orders = context.watch<OrdersProvider>()
-        .clientOrders(auth.user?.displayName ?? '');
+        .clientOrders(auth.user?.name ?? '');
 
     return Scaffold(
       backgroundColor: AppColors.background,
