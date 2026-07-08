@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/product_model.dart';
@@ -20,6 +21,8 @@ class _AdminModelesScreenState extends State<AdminModelesScreen> {
   final _descCtrl = TextEditingController();
   ProductCategory _category = ProductCategory.robe;
   ProductBadge _badge = ProductBadge.pieceSignature;
+  final List<XFile> _pickedImages = [];
+  bool _picking = false;
 
   @override
   void dispose() {
@@ -28,8 +31,35 @@ class _AdminModelesScreenState extends State<AdminModelesScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImages() async {
+    if (_picking) return;
+    setState(() => _picking = true);
+    try {
+      final picker = ImagePicker();
+      final images = await picker.pickMultiImage(limit: 4);
+      if (images.isNotEmpty) {
+        setState(() {
+          _pickedImages.addAll(images);
+          if (_pickedImages.length > 4) {
+            _pickedImages.removeRange(4, _pickedImages.length);
+          }
+        });
+      }
+    } finally {
+      setState(() => _picking = false);
+    }
+  }
+
+  void _removeImage(int index) {
+    setState(() => _pickedImages.removeAt(index));
+  }
+
   void _addModel() {
     if (_nameCtrl.text.trim().isEmpty) return;
+    final imageUrls = _pickedImages.isNotEmpty
+        ? _pickedImages.map((f) => f.path).toList()
+        : <String>[];
+
     context.read<ProductsProvider>().addProduct(ProductModel(
       id: 'p${DateTime.now().millisecondsSinceEpoch}',
       name: _nameCtrl.text.trim(),
@@ -37,10 +67,11 @@ class _AdminModelesScreenState extends State<AdminModelesScreen> {
       description: _descCtrl.text.trim(),
       category: _category,
       badge: _badge,
-      imageUrls: ['https://picsum.photos/seed/${_nameCtrl.text}/800/1000'],
+      imageUrls: imageUrls,
     ));
     _nameCtrl.clear();
     _descCtrl.clear();
+    _pickedImages.clear();
     setState(() => _showAddForm = false);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -87,11 +118,13 @@ class _AdminModelesScreenState extends State<AdminModelesScreen> {
                         color: AppColors.gold,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Text('+ Ajouter',
-                          style: TextStyle(
-                              color: AppColors.background,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13)),
+                      child: Text(
+                        _showAddForm ? '✕ Fermer' : '+ Ajouter',
+                        style: const TextStyle(
+                            color: AppColors.background,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13),
+                      ),
                     ),
                   ),
                 ],
@@ -112,16 +145,14 @@ class _AdminModelesScreenState extends State<AdminModelesScreen> {
                 TextFormField(
                   controller: _nameCtrl,
                   style: const TextStyle(color: AppColors.white),
-                  decoration:
-                      const InputDecoration(hintText: 'Nom de la création'),
+                  decoration: const InputDecoration(hintText: 'Nom de la création'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _descCtrl,
                   maxLines: 3,
                   style: const TextStyle(color: AppColors.white),
-                  decoration:
-                      const InputDecoration(hintText: 'Description'),
+                  decoration: const InputDecoration(hintText: 'Description'),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -133,8 +164,8 @@ class _AdminModelesScreenState extends State<AdminModelesScreen> {
                         items: ProductCategory.values,
                         itemLabel: (c) {
                           switch (c) {
-                            case ProductCategory.robe:    return 'Robe';
-                            case ProductCategory.kaftan:  return 'Kaftan';
+                            case ProductCategory.robe: return 'Robe';
+                            case ProductCategory.kaftan: return 'Kaftan';
                             case ProductCategory.tailleur: return 'Tailleur';
                             case ProductCategory.ensemble: return 'Ensemble';
                           }
@@ -152,7 +183,7 @@ class _AdminModelesScreenState extends State<AdminModelesScreen> {
                           switch (b) {
                             case ProductBadge.pieceSignature: return 'Signature';
                             case ProductBadge.surMesureDispo: return 'Sur-mesure';
-                            case ProductBadge.nouveaute:      return 'Nouveauté';
+                            case ProductBadge.nouveaute: return 'Nouveauté';
                           }
                         },
                         onChanged: (v) => setState(() => _badge = v!),
@@ -161,29 +192,95 @@ class _AdminModelesScreenState extends State<AdminModelesScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Photo add placeholder
-                Container(
-                  width: double.infinity,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: AppColors.cardBorder,
-                        style: BorderStyle.solid),
+
+                // Photo section
+                const Text('PHOTOS',
+                    style: TextStyle(
+                        color: AppColors.gold, fontSize: 11, letterSpacing: 2.5)),
+                const SizedBox(height: 10),
+
+                // Picked images preview
+                if (_pickedImages.isNotEmpty) ...[
+                  SizedBox(
+                    height: 90,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _pickedImages.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (_, i) => Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: SizedBox(
+                              width: 80,
+                              height: 90,
+                              child: AppImage(
+                                imageUrl: _pickedImages[i].path,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: GestureDetector(
+                              onTap: () => _removeImage(i),
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.error,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.close,
+                                    size: 12, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add_photo_alternate_outlined,
-                          color: AppColors.textMuted, size: 28),
-                      SizedBox(height: 8),
-                      Text('Ajouter 2–4 photos',
-                          style: TextStyle(
-                              color: AppColors.textMuted, fontSize: 13)),
-                    ],
+                  const SizedBox(height: 10),
+                ],
+
+                // Picker button
+                if (_pickedImages.length < 4)
+                  GestureDetector(
+                    onTap: _picking ? null : _pickImages,
+                    child: Container(
+                      width: double.infinity,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.gold.withOpacity(0.5),
+                          style: BorderStyle.solid,
+                        ),
+                      ),
+                      child: _picking
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                  color: AppColors.gold, strokeWidth: 2))
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.add_photo_alternate_outlined,
+                                    color: AppColors.gold, size: 28),
+                                const SizedBox(height: 6),
+                                Text(
+                                  _pickedImages.isEmpty
+                                      ? 'Ajouter 2–4 photos depuis la galerie'
+                                      : 'Ajouter encore (${4 - _pickedImages.length} restant)',
+                                  style: const TextStyle(
+                                      color: AppColors.gold, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                    ),
                   ),
-                ),
+
                 const SizedBox(height: 20),
                 GoldButton(label: 'Enregistrer le modèle', onPressed: _addModel),
                 const SizedBox(height: 40),
@@ -209,7 +306,6 @@ class _ModelRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       child: Row(
         children: [
-          // Thumbnail
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: SizedBox(
@@ -233,7 +329,6 @@ class _ModelRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 14),
-          // Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,9 +346,7 @@ class _ModelRow extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: product.isActive
-                        ? AppColors.goldFaint
-                        : AppColors.surface,
+                    color: product.isActive ? AppColors.goldFaint : AppColors.surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: product.isActive
@@ -264,16 +357,13 @@ class _ModelRow extends StatelessWidget {
                   child: Text(
                     product.isActive ? 'Publié' : 'Désactivé',
                     style: TextStyle(
-                        color: product.isActive
-                            ? AppColors.gold
-                            : AppColors.textMuted,
+                        color: product.isActive ? AppColors.gold : AppColors.textMuted,
                         fontSize: 11),
                   ),
                 ),
               ],
             ),
           ),
-          // Actions
           Row(
             children: [
               GestureDetector(
@@ -286,9 +376,7 @@ class _ModelRow extends StatelessWidget {
                     border: Border.all(color: AppColors.cardBorder),
                   ),
                   child: Icon(
-                    product.isActive
-                        ? Icons.visibility
-                        : Icons.visibility_off_outlined,
+                    product.isActive ? Icons.visibility : Icons.visibility_off_outlined,
                     size: 18,
                     color: product.isActive ? AppColors.gold : AppColors.textMuted,
                   ),
@@ -370,17 +458,25 @@ class _DropdownField<T> extends StatelessWidget {
           dropdownColor: AppColors.surface,
           style: const TextStyle(color: AppColors.white, fontSize: 13),
           isExpanded: true,
-          hint: Text(label,
-              style: const TextStyle(color: AppColors.textMuted)),
+          hint: Text(label, style: const TextStyle(color: AppColors.textMuted)),
           items: items
-              .map((i) => DropdownMenuItem(
-                    value: i,
-                    child: Text(itemLabel(i)),
-                  ))
+              .map((i) => DropdownMenuItem(value: i, child: Text(itemLabel(i))))
               .toList(),
           onChanged: onChanged,
         ),
       ),
     );
+  }
+}
+
+class SectionLabel extends StatelessWidget {
+  final String text;
+  const SectionLabel(this.text, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(text,
+        style: const TextStyle(
+            color: AppColors.gold, fontSize: 11, letterSpacing: 2.5));
   }
 }

@@ -1,8 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../core/constants/app_colors.dart';
 
-/// Renders a local asset or a remote URL transparently.
+/// Renders local assets, device file paths, or remote URLs transparently.
 class AppImage extends StatelessWidget {
   final String imageUrl;
   final BoxFit fit;
@@ -18,6 +19,7 @@ class AppImage extends StatelessWidget {
   });
 
   bool get _isAsset => imageUrl.startsWith('assets/');
+  bool get _isFile => imageUrl.startsWith('/') || imageUrl.startsWith('file://');
 
   Widget get _placeholder =>
       placeholder ?? Container(color: AppColors.card);
@@ -30,6 +32,14 @@ class AppImage extends StatelessWidget {
     if (_isAsset) {
       return Image.asset(
         imageUrl,
+        fit: fit,
+        errorBuilder: (_, __, ___) => _error,
+      );
+    }
+    if (_isFile) {
+      final path = imageUrl.startsWith('file://') ? imageUrl.substring(7) : imageUrl;
+      return Image.file(
+        File(path),
         fit: fit,
         errorBuilder: (_, __, ___) => _error,
       );

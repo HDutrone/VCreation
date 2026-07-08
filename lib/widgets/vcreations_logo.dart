@@ -15,60 +15,37 @@ class VCreationsLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vColor = darkBackground ? AppColors.white : Colors.black;
+    final vColor = darkBackground ? AppColors.white : const Color(0xFF111111);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
           width: size,
-          height: size * 0.85,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Large V
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Text(
-                    'V',
-                    style: TextStyle(
-                      fontSize: size * 0.82,
-                      fontWeight: FontWeight.w900,
-                      color: vColor,
-                      height: 1.0,
-                      fontFamily: 'serif',
-                    ),
-                  ),
-                ),
-              ),
-              // Gold dress shape (ellipse representing the silhouette)
-              Positioned(
-                bottom: 0,
-                child: _DressShape(size: size),
-              ),
-            ],
+          height: size,
+          child: CustomPaint(
+            painter: _VLogoFullPainter(
+              vColor: vColor,
+              dressColor: AppColors.gold,
+            ),
           ),
         ),
-        const SizedBox(height: 4),
-        // "Créations" in gold italic
+        const SizedBox(height: 6),
         Text(
           'Créations',
           style: TextStyle(
-            fontSize: size * 0.28,
+            fontSize: size * 0.26,
             color: AppColors.gold,
             fontStyle: FontStyle.italic,
             fontWeight: FontWeight.w700,
-            letterSpacing: 1,
+            letterSpacing: 0.5,
           ),
         ),
         if (showSubtitle) ...[
-          const SizedBox(height: 2),
+          const SizedBox(height: 3),
           Text(
             'Haute-couture',
             style: TextStyle(
-              fontSize: size * 0.11,
+              fontSize: size * 0.10,
               color: darkBackground ? AppColors.textSecondary : Colors.black54,
               letterSpacing: 3,
               fontWeight: FontWeight.w300,
@@ -80,78 +57,130 @@ class VCreationsLogo extends StatelessWidget {
   }
 }
 
-class _DressShape extends StatelessWidget {
-  final double size;
-  const _DressShape({required this.size});
+class _VLogoFullPainter extends CustomPainter {
+  final Color vColor;
+  final Color dressColor;
 
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(size * 0.38, size * 0.58),
-      painter: _DressPainter(),
-    );
-  }
-}
+  const _VLogoFullPainter({required this.vColor, required this.dressColor});
 
-class _DressPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.gold
+    final W = size.width;
+    final H = size.height;
+    final cx = W / 2;
+
+    final vPaint = Paint()
+      ..color = vColor
       ..style = PaintingStyle.fill;
 
-    final path = Path();
-    final cx = size.width / 2;
+    final dressPaint = Paint()
+      ..color = dressColor
+      ..style = PaintingStyle.fill;
 
-    // Dress silhouette: narrow top (shoulders), wider middle (bust),
-    // narrow waist, flared skirt
-    path.moveTo(cx * 0.5, 0); // left shoulder
-    path.lineTo(cx * 1.5, 0); // right shoulder
-    path.cubicTo(
-      cx * 1.8, size.height * 0.15,
-      cx * 1.9, size.height * 0.25,
-      cx * 1.7, size.height * 0.4,
-    ); // right bust curve
-    path.cubicTo(
-      cx * 1.5, size.height * 0.52,
-      cx * 1.4, size.height * 0.58,
-      cx * 1.65, size.height * 0.75,
-    ); // right waist to skirt
-    path.cubicTo(
-      cx * 1.85, size.height * 0.88,
-      cx * 1.9, size.height * 0.95,
-      cx * 1.7, size.height,
-    ); // right skirt hem
-    path.lineTo(cx * 0.3, size.height); // hem
-    path.cubicTo(
-      cx * 0.1, size.height * 0.95,
-      cx * 0.15, size.height * 0.88,
-      cx * 0.35, size.height * 0.75,
-    ); // left skirt
-    path.cubicTo(
-      cx * 0.6, size.height * 0.58,
-      cx * 0.5, size.height * 0.52,
-      cx * 0.3, size.height * 0.4,
-    ); // left waist
-    path.cubicTo(
-      cx * 0.1, size.height * 0.25,
-      cx * 0.2, size.height * 0.15,
-      cx * 0.5, 0,
-    ); // left bust
+    // ── V shape: two angular filled arms ──────────────────────────────────
+    // Left arm: wide triangle from top-left area to center-bottom
+    final vPath = Path();
+    // Left arm
+    vPath.moveTo(0, 0);
+    vPath.lineTo(W * 0.32, 0);
+    vPath.lineTo(cx, H * 0.98);
+    vPath.close();
 
-    path.close();
-    canvas.drawPath(path, paint);
+    // Right arm
+    vPath.moveTo(W * 0.68, 0);
+    vPath.lineTo(W, 0);
+    vPath.lineTo(cx, H * 0.98);
+    vPath.close();
 
-    // Hanger dot at top
-    final dotPaint = Paint()..color = AppColors.gold;
-    canvas.drawCircle(Offset(cx, -size.height * 0.06), size.width * 0.07, dotPaint);
+    canvas.drawPath(vPath, vPaint);
+
+    // ── Decorative curved strokes (calligraphic lines around dress) ────────
+    final strokePaint = Paint()
+      ..color = vColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = W * 0.016
+      ..strokeCap = StrokeCap.round;
+
+    // Left sweep
+    final leftSweep = Path();
+    leftSweep.moveTo(W * 0.36, H * 0.14);
+    leftSweep.cubicTo(
+      W * 0.22, H * 0.25,
+      W * 0.18, H * 0.45,
+      W * 0.30, H * 0.68,
+    );
+    canvas.drawPath(leftSweep, strokePaint);
+
+    // Right sweep (mirror)
+    final rightSweep = Path();
+    rightSweep.moveTo(W * 0.64, H * 0.14);
+    rightSweep.cubicTo(
+      W * 0.78, H * 0.25,
+      W * 0.82, H * 0.45,
+      W * 0.70, H * 0.68,
+    );
+    canvas.drawPath(rightSweep, strokePaint);
+
+    // ── Gold dress / mannequin figure (centered, inside the V) ─────────────
+    final dressTop = H * 0.20;
+    final dressBot = H * 0.86;
+    final dressH = dressBot - dressTop;
+    final dw = W * 0.19; // half-width of widest part
+
+    final dressPath = Path();
+    // Start at top-center (neck/top)
+    dressPath.moveTo(cx - W * 0.05, dressTop);
+    // Left shoulder → bust
+    dressPath.cubicTo(
+      cx - dw * 0.5, dressTop + dressH * 0.08,
+      cx - dw * 1.0, dressTop + dressH * 0.25,
+      cx - dw * 0.75, dressTop + dressH * 0.48, // waist
+    );
+    // Left waist → skirt hem
+    dressPath.cubicTo(
+      cx - dw * 0.90, dressTop + dressH * 0.68,
+      cx - dw * 1.10, dressTop + dressH * 0.85,
+      cx - dw * 0.80, dressBot,
+    );
+    // Bottom
+    dressPath.lineTo(cx + dw * 0.80, dressBot);
+    // Right skirt → waist
+    dressPath.cubicTo(
+      cx + dw * 1.10, dressTop + dressH * 0.85,
+      cx + dw * 0.90, dressTop + dressH * 0.68,
+      cx + dw * 0.75, dressTop + dressH * 0.48, // waist
+    );
+    // Right bust → shoulder
+    dressPath.cubicTo(
+      cx + dw * 1.0, dressTop + dressH * 0.25,
+      cx + dw * 0.5, dressTop + dressH * 0.08,
+      cx + W * 0.05, dressTop,
+    );
+    dressPath.close();
+
+    canvas.drawPath(dressPath, dressPaint);
+
+    // ── Head circle ───────────────────────────────────────────────────────
+    final headR = W * 0.058;
+    canvas.drawCircle(Offset(cx, dressTop - headR * 0.6), headR, dressPaint);
+
+    // ── Neck connector (thin rectangle) ──────────────────────────────────
+    final neckPaint = Paint()..color = dressColor..style = PaintingStyle.fill;
+    canvas.drawRect(
+      Rect.fromCenter(
+        center: Offset(cx, dressTop - headR * 0.05),
+        width: W * 0.04,
+        height: headR * 1.4,
+      ),
+      neckPaint,
+    );
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Compact logo (icon only) for the app bar
+/// Compact inline logo for app bars
 class VCreationsLogoSmall extends StatelessWidget {
   final double height;
   const VCreationsLogoSmall({super.key, this.height = 36});
@@ -164,30 +193,15 @@ class VCreationsLogoSmall extends StatelessWidget {
       children: [
         SizedBox(
           height: height,
-          width: height * 0.7,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Text(
-                'V',
-                style: TextStyle(
-                  fontSize: height * 0.9,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.white,
-                  height: 1,
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                child: CustomPaint(
-                  size: Size(height * 0.28, height * 0.45),
-                  painter: _DressPainter(),
-                ),
-              ),
-            ],
+          width: height,
+          child: CustomPaint(
+            painter: _VLogoFullPainter(
+              vColor: AppColors.white,
+              dressColor: AppColors.gold,
+            ),
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 8),
         Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,3 +229,4 @@ class VCreationsLogoSmall extends StatelessWidget {
     );
   }
 }
+

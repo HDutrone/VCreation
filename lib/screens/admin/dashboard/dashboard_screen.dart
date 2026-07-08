@@ -4,6 +4,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../models/product_model.dart';
 import '../../../providers/orders_provider.dart';
 import '../../../providers/products_provider.dart';
+import '../../../providers/settings_provider.dart';
+import '../../../widgets/app_image.dart';
 import '../../../widgets/gold_divider.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -98,6 +100,11 @@ class DashboardScreen extends StatelessWidget {
                         rank: entry.key + 1,
                         product: entry.value,
                       )),
+
+              const SizedBox(height: 32),
+              const SectionLabel('Paramètres contact'),
+              const SizedBox(height: 16),
+              const _WhatsAppSettingCard(),
               const SizedBox(height: 40),
             ],
           ),
@@ -202,11 +209,24 @@ class _TopCreationItem extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Container(
+            child: SizedBox(
               width: 48,
               height: 52,
-              color: AppColors.card,
-              child: const Icon(Icons.checkroom, color: AppColors.textMuted, size: 22),
+              child: product.imageUrls.isNotEmpty
+                  ? AppImage(
+                      imageUrl: product.imageUrls.first,
+                      fit: BoxFit.cover,
+                      errorWidget: Container(
+                        color: AppColors.card,
+                        child: const Icon(Icons.checkroom,
+                            color: AppColors.textMuted, size: 22),
+                      ),
+                    )
+                  : Container(
+                      color: AppColors.card,
+                      child: const Icon(Icons.checkroom,
+                          color: AppColors.textMuted, size: 22),
+                    ),
             ),
           ),
           const SizedBox(width: 14),
@@ -234,6 +254,139 @@ class _TopCreationItem extends StatelessWidget {
                 style: const TextStyle(
                     color: AppColors.gold, fontWeight: FontWeight.w700, fontSize: 12)),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WhatsAppSettingCard extends StatefulWidget {
+  const _WhatsAppSettingCard();
+
+  @override
+  State<_WhatsAppSettingCard> createState() => _WhatsAppSettingCardState();
+}
+
+class _WhatsAppSettingCardState extends State<_WhatsAppSettingCard> {
+  bool _editing = false;
+  late TextEditingController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF25D366).withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.chat_bubble, color: Color(0xFF25D366), size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Numéro WhatsApp',
+                        style: TextStyle(
+                            color: AppColors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14)),
+                    Text(settings.whatsappDisplay,
+                        style: const TextStyle(
+                            color: AppColors.textSecondary, fontSize: 12)),
+                  ],
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _editing = !_editing;
+                    if (_editing) {
+                      _ctrl.text = settings.whatsappNumber;
+                    }
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _editing ? AppColors.goldFaint : AppColors.card,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                        color: _editing ? AppColors.gold : AppColors.cardBorder),
+                  ),
+                  child: Text(
+                    _editing ? 'Annuler' : 'Modifier',
+                    style: TextStyle(
+                        color: _editing ? AppColors.gold : AppColors.textSecondary,
+                        fontSize: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (_editing) ...[
+            const SizedBox(height: 14),
+            TextFormField(
+              controller: _ctrl,
+              keyboardType: TextInputType.phone,
+              style: const TextStyle(color: AppColors.white),
+              decoration: const InputDecoration(
+                hintText: '243XXXXXXXXX (sans + ni espaces)',
+                prefixText: '+',
+                prefixStyle: TextStyle(color: AppColors.gold),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.gold,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: () {
+                  context.read<SettingsProvider>().setWhatsappNumber(_ctrl.text);
+                  setState(() => _editing = false);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    backgroundColor: AppColors.surface,
+                    content: Text('Numéro WhatsApp mis à jour',
+                        style: TextStyle(color: AppColors.white)),
+                  ));
+                },
+                child: const Text('Enregistrer',
+                    style: TextStyle(
+                        color: AppColors.background, fontWeight: FontWeight.w700)),
+              ),
+            ),
+          ],
         ],
       ),
     );

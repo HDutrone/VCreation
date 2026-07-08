@@ -41,20 +41,28 @@ jobs:
           with open(path, 'r') as f:
               content = f.read()
 
-          queries_block = """
-              <queries>
-                  <intent>
-                      <action android:name="android.intent.action.VIEW" />
-                      <data android:scheme="https" />
-                  </intent>
-                  <intent>
-                      <action android:name="android.intent.action.VIEW" />
-                      <data android:scheme="whatsapp" />
-                  </intent>
-              </queries>
-          """
+          permissions_block = """
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
+"""
 
-          # Insert before </manifest>
+          queries_block = """
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="whatsapp" />
+        </intent>
+    </queries>
+"""
+
+          # Insert permissions before <application
+          content = content.replace('<application', permissions_block + '\n    <application', 1)
+          # Insert queries before </manifest>
           content = content.replace('</manifest>', queries_block + '\n</manifest>')
 
           with open(path, 'w') as f:
