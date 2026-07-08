@@ -17,20 +17,20 @@ class MainClientScreen extends StatefulWidget {
 
 class _MainClientScreenState extends State<MainClientScreen> {
   late int _currentIndex;
+  late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    _screens = [
+      HomeScreen(onNavigateToTab: (i) => setState(() => _currentIndex = i)),
+      const CollectionsScreen(),
+      const SurMesureScreen(),
+      const CartScreen(),
+      const ProfileScreen(),
+    ];
   }
-
-  final _screens = const [
-    HomeScreen(),
-    CollectionsScreen(),
-    SurMesureScreen(),
-    CartScreen(),
-    ProfileScreen(),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -49,30 +49,25 @@ class _MainClientScreenState extends State<MainClientScreen> {
       type: BottomNavigationBarType.fixed,
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home),
-          label: 'Accueil',
-        ),
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Accueil'),
         BottomNavigationBarItem(
-          icon: Icon(Icons.grid_view_outlined),
-          activeIcon: Icon(Icons.grid_view),
-          label: 'Collections',
-        ),
+            icon: Icon(Icons.grid_view_outlined),
+            activeIcon: Icon(Icons.grid_view),
+            label: 'Collections'),
         BottomNavigationBarItem(
-          icon: _SurMesureIcon(active: false),
-          activeIcon: _SurMesureIcon(active: true),
-          label: 'Sur-Mesure',
-        ),
+            icon: _SurMesureIcon(active: false),
+            activeIcon: _SurMesureIcon(active: true),
+            label: 'Sur-Mesure'),
         BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_bag_outlined),
-          activeIcon: Icon(Icons.shopping_bag),
-          label: 'Panier',
-        ),
+            icon: Icon(Icons.shopping_bag_outlined),
+            activeIcon: Icon(Icons.shopping_bag),
+            label: 'Panier'),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          activeIcon: Icon(Icons.person),
-          label: 'Profil',
-        ),
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Profil'),
       ],
     );
   }
@@ -84,9 +79,7 @@ class _SurMesureIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Icon(
-      Icons.water_drop_outlined,
-      color: active ? AppColors.gold : AppColors.textMuted,
-    );
+    return Icon(Icons.water_drop_outlined,
+        color: active ? AppColors.gold : AppColors.textMuted);
   }
 }

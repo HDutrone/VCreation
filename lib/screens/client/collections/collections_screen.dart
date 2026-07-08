@@ -14,14 +14,17 @@ class CollectionsScreen extends StatefulWidget {
 }
 
 class _CollectionsScreenState extends State<CollectionsScreen> {
-  ProductCategory? _filter;
+  // null = toutes, 0-3 = ProductCategory.values index
+  int? _filterIndex;
+
+  ProductCategory? get _filter =>
+      _filterIndex == null ? null : ProductCategory.values[_filterIndex!];
 
   @override
   Widget build(BuildContext context) {
     final all = context.watch<ProductsProvider>().activeProducts;
-    final filtered = _filter == null
-        ? all
-        : all.where((p) => p.category == _filter).toList();
+    final filtered =
+        _filter == null ? all : all.where((p) => p.category == _filter).toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -38,50 +41,85 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
                 Text(
                   '${all.length} CRÉATIONS',
                   style: const TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 11,
-                    letterSpacing: 2,
-                  ),
+                      color: AppColors.textMuted,
+                      fontSize: 11,
+                      letterSpacing: 2),
                 ),
               ],
             ),
             titleSpacing: 20,
             toolbarHeight: 72,
             actions: [
-              PopupMenuButton<ProductCategory?>(
+              PopupMenuButton<int>(
                 color: AppColors.surface,
-                onSelected: (v) => setState(() => _filter = v),
+                // Use int index to avoid null-selection issue with nullable type
+                onSelected: (v) =>
+                    setState(() => _filterIndex = v == -1 ? null : v),
                 itemBuilder: (_) => [
-                  const PopupMenuItem(value: null, child: Text('Toutes', style: TextStyle(color: AppColors.white))),
-                  const PopupMenuItem(value: ProductCategory.robe, child: Text('Robes', style: TextStyle(color: AppColors.white))),
-                  const PopupMenuItem(value: ProductCategory.kaftan, child: Text('Kaftans', style: TextStyle(color: AppColors.white))),
-                  const PopupMenuItem(value: ProductCategory.tailleur, child: Text('Tailleurs', style: TextStyle(color: AppColors.white))),
-                  const PopupMenuItem(value: ProductCategory.ensemble, child: Text('Ensembles', style: TextStyle(color: AppColors.white))),
+                  const PopupMenuItem(
+                      value: -1,
+                      child: Text('Toutes',
+                          style: TextStyle(color: AppColors.white))),
+                  const PopupMenuItem(
+                      value: 0,
+                      child: Text('Robes',
+                          style: TextStyle(color: AppColors.white))),
+                  const PopupMenuItem(
+                      value: 1,
+                      child: Text('Kaftans',
+                          style: TextStyle(color: AppColors.white))),
+                  const PopupMenuItem(
+                      value: 2,
+                      child: Text('Tailleurs',
+                          style: TextStyle(color: AppColors.white))),
+                  const PopupMenuItem(
+                      value: 3,
+                      child: Text('Ensembles',
+                          style: TextStyle(color: AppColors.white))),
                 ],
                 child: Container(
                   margin: const EdgeInsets.only(right: 16),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.cardBorder),
+                    border: Border.all(
+                        color: _filterIndex != null
+                            ? AppColors.gold
+                            : AppColors.cardBorder),
                     borderRadius: BorderRadius.circular(20),
+                    color: _filterIndex != null
+                        ? AppColors.goldFaint
+                        : Colors.transparent,
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Text('Filtrer', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                      SizedBox(width: 4),
-                      Icon(Icons.chevron_right, color: AppColors.textMuted, size: 16),
+                      Text(
+                        _filterIndex == null
+                            ? 'Filtrer'
+                            : _filterLabel(_filterIndex!),
+                        style: TextStyle(
+                            color: _filterIndex != null
+                                ? AppColors.gold
+                                : AppColors.textSecondary,
+                            fontSize: 13),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        color: _filterIndex != null
+                            ? AppColors.gold
+                            : AppColors.textMuted,
+                        size: 16,
+                      ),
                     ],
                   ),
                 ),
               ),
             ],
           ),
-
           SliverToBoxAdapter(
             child: Column(
               children: [
                 const SizedBox(height: 12),
-                // Gold dot separator
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -99,26 +137,50 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
               ],
             ),
           ),
-
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 20,
-                childAspectRatio: 0.70,
+          if (filtered.isEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                child: Center(
+                  child: Text(
+                    'Aucune création dans cette catégorie.',
+                    style: const TextStyle(
+                        color: AppColors.textMuted, fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
-              delegate: SliverChildBuilderDelegate(
-                (_, i) => _CollectionCard(product: filtered[i]),
-                childCount: filtered.length,
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverGrid(
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 20,
+                  childAspectRatio: 0.70,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (_, i) => _CollectionCard(product: filtered[i]),
+                  childCount: filtered.length,
+                ),
               ),
             ),
-          ),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
       ),
     );
+  }
+
+  String _filterLabel(int idx) {
+    switch (ProductCategory.values[idx]) {
+      case ProductCategory.robe:     return 'Robes';
+      case ProductCategory.kaftan:   return 'Kaftans';
+      case ProductCategory.tailleur: return 'Tailleurs';
+      case ProductCategory.ensemble: return 'Ensembles';
+    }
   }
 }
 
@@ -147,16 +209,18 @@ class _CollectionCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  AppImage(
-                    imageUrl: product.imageUrls.first,
-                    fit: BoxFit.cover,
-                    errorWidget: _colorBlock(product),
-                  ),
+                  product.imageUrls.isNotEmpty
+                      ? AppImage(
+                          imageUrl: product.imageUrls.first,
+                          fit: BoxFit.cover,
+                          errorWidget: _colorBlock(product),
+                        )
+                      : _colorBlock(product),
                   Positioned(
-                    top: 10,
-                    right: 10,
+                    top: 10, right: 10,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.black54,
                         borderRadius: BorderRadius.circular(6),
@@ -164,19 +228,21 @@ class _CollectionCard extends StatelessWidget {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.grid_view, size: 10, color: AppColors.white),
+                          Icon(Icons.grid_view,
+                              size: 10, color: AppColors.white),
                           SizedBox(width: 4),
                           Text('Galerie',
-                              style: TextStyle(color: AppColors.white, fontSize: 10)),
+                              style: TextStyle(
+                                  color: AppColors.white, fontSize: 10)),
                         ],
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 10,
-                    bottom: 10,
+                    left: 10, bottom: 10,
                     child: Text('${product.viewCount} vues',
-                        style: const TextStyle(color: AppColors.white, fontSize: 10)),
+                        style: const TextStyle(
+                            color: AppColors.white, fontSize: 10)),
                   ),
                 ],
               ),
@@ -185,7 +251,9 @@ class _CollectionCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(product.name,
               style: const TextStyle(
-                  color: AppColors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+                  color: AppColors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14)),
           const SizedBox(height: 4),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -228,7 +296,8 @@ class _CollectionCard extends StatelessWidget {
       child: Center(
         child: Text(p.name,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+            style: const TextStyle(
+                color: AppColors.textMuted, fontSize: 12)),
       ),
     );
   }

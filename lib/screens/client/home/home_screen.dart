@@ -3,23 +3,24 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/product_model.dart';
 import '../../../providers/auth_provider.dart';
-import '../../../providers/cart_provider.dart';
 import '../../../providers/products_provider.dart';
 import '../../../widgets/app_image.dart';
 import '../../../widgets/vcreations_logo.dart';
 import '../../../widgets/whatsapp_fab.dart';
 import '../collections/collection_detail_screen.dart';
+import '../collections/collections_screen.dart';
 import '../../auth/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final void Function(int)? onNavigateToTab;
+  const HomeScreen({super.key, this.onNavigateToTab});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  ProductCategory? _filter; // null = tous
+  ProductCategory? _filter;
 
   static const _categories = [
     (null, 'Tous'),
@@ -43,7 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          // App Bar
           SliverAppBar(
             pinned: true,
             backgroundColor: AppColors.background,
@@ -62,21 +62,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 },
                 child: Container(
-                  width: 34,
-                  height: 34,
+                  width: 34, height: 34,
                   margin: const EdgeInsets.only(right: 16),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.gold, width: 1.5),
-                    color: auth.isLoggedIn
-                        ? AppColors.goldFaint
-                        : AppColors.surface,
+                    color: auth.isLoggedIn ? AppColors.goldFaint : AppColors.surface,
                   ),
                   child: Center(
                     child: Text(
-                      auth.isLoggedIn
-                          ? auth.user!.initials
-                          : '?',
+                      auth.isLoggedIn ? auth.user!.initials : '?',
                       style: const TextStyle(
                           color: AppColors.gold,
                           fontSize: 14,
@@ -87,16 +82,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-
           SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Hero banner
                 _HeroBanner(product: products.isNotEmpty ? products.first : null),
                 const SizedBox(height: 20),
 
-                // Category filter
+                // Category filter chips
                 SizedBox(
                   height: 38,
                   child: ListView.separated(
@@ -115,9 +108,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               horizontal: 18, vertical: 8),
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color:
-                                  selected ? AppColors.gold : AppColors.cardBorder,
-                            ),
+                                color: selected
+                                    ? AppColors.gold
+                                    : AppColors.cardBorder),
                             borderRadius: BorderRadius.circular(20),
                             color: selected
                                 ? AppColors.goldFaint
@@ -141,14 +134,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // Gold dot separator
-                const Center(
-                  child: _GoldDot(),
-                ),
+                const Center(child: _GoldDot()),
                 const SizedBox(height: 24),
 
-                // Créations vedettes
+                // Créations vedettes header
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
@@ -157,7 +146,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text('Créations vedettes',
                           style: Theme.of(context).textTheme.titleLarge),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          if (widget.onNavigateToTab != null) {
+                            widget.onNavigateToTab!(1);
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const CollectionsScreen()),
+                            );
+                          }
+                        },
                         child: const Text('Voir tout ›',
                             style: TextStyle(
                                 color: AppColors.textSecondary, fontSize: 13)),
@@ -167,27 +166,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                // Grid
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 20,
-                      childAspectRatio: 0.72,
+                // Product grid
+                if (featured.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text('Aucune création dans cette catégorie.',
+                        style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 20,
+                        childAspectRatio: 0.72,
+                      ),
+                      itemCount: featured.take(4).length,
+                      itemBuilder: (_, i) =>
+                          _ProductCard(product: featured[i]),
                     ),
-                    itemCount: featured.take(4).length,
-                    itemBuilder: (_, i) =>
-                        _ProductCard(product: featured[i]),
                   ),
-                ),
                 const SizedBox(height: 32),
-
-                // WhatsApp banner
                 const WhatsAppBanner(),
                 const SizedBox(height: 28),
               ],
@@ -216,7 +220,7 @@ class _HeroBanner extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (product != null)
+          if (product != null && product!.imageUrls.isNotEmpty)
             AppImage(
               imageUrl: product!.imageUrls.first,
               fit: BoxFit.cover,
@@ -224,7 +228,6 @@ class _HeroBanner extends StatelessWidget {
             )
           else
             const _PlaceholderImage(label: 'NOUVELLE COLLECTION'),
-          // Gradient overlay
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -234,10 +237,8 @@ class _HeroBanner extends StatelessWidget {
               ),
             ),
           ),
-          // Top right badge
           Positioned(
-            top: 14,
-            right: 14,
+            top: 14, right: 14,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
@@ -248,10 +249,8 @@ class _HeroBanner extends StatelessWidget {
                   style: TextStyle(color: AppColors.white, fontSize: 11)),
             ),
           ),
-          // Bottom text
           Positioned(
-            left: 16,
-            bottom: 16,
+            left: 16, bottom: 16,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -264,10 +263,9 @@ class _HeroBanner extends StatelessWidget {
                 Text(
                   product?.name ?? 'Collection 2025',
                   style: const TextStyle(
-                    color: AppColors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                  ),
+                      color: AppColors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700),
                 ),
               ],
             ),
@@ -303,15 +301,15 @@ class _ProductCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  AppImage(
-                    imageUrl: product.imageUrls.first,
-                    fit: BoxFit.cover,
-                    errorWidget: _PlaceholderImage(label: product.name),
-                  ),
-                  // Galerie badge
+                  product.imageUrls.isNotEmpty
+                      ? AppImage(
+                          imageUrl: product.imageUrls.first,
+                          fit: BoxFit.cover,
+                          errorWidget: _PlaceholderImage(label: product.name),
+                        )
+                      : _PlaceholderImage(label: product.name),
                   Positioned(
-                    top: 10,
-                    right: 10,
+                    top: 10, right: 10,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
@@ -319,23 +317,20 @@ class _ProductCard extends StatelessWidget {
                         color: Colors.black54,
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.grid_view,
-                              size: 10, color: AppColors.white),
-                          const SizedBox(width: 4),
-                          const Text('Galerie',
+                          Icon(Icons.grid_view, size: 10, color: AppColors.white),
+                          SizedBox(width: 4),
+                          Text('Galerie',
                               style: TextStyle(
                                   color: AppColors.white, fontSize: 10)),
                         ],
                       ),
                     ),
                   ),
-                  // View count
                   Positioned(
-                    left: 10,
-                    bottom: 10,
+                    left: 10, bottom: 10,
                     child: Text(
                       '${product.viewCount} vues',
                       style: const TextStyle(
@@ -391,15 +386,10 @@ class _PlaceholderImage extends StatelessWidget {
     return Container(
       color: AppColors.card,
       child: Center(
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: AppColors.textMuted,
-            fontSize: 12,
-            letterSpacing: 1,
-          ),
-        ),
+        child: Text(label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: AppColors.textMuted, fontSize: 12, letterSpacing: 1)),
       ),
     );
   }
@@ -415,13 +405,10 @@ class _GoldDot extends StatelessWidget {
       children: [
         Container(width: 60, height: 0.5, color: AppColors.divider),
         Container(
-          width: 6,
-          height: 6,
+          width: 6, height: 6,
           margin: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: const BoxDecoration(
-            color: AppColors.gold,
-            shape: BoxShape.circle,
-          ),
+          decoration:
+              const BoxDecoration(color: AppColors.gold, shape: BoxShape.circle),
         ),
         Container(width: 60, height: 0.5, color: AppColors.divider),
       ],

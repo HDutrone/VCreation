@@ -15,14 +15,19 @@ class MainAdminScreen extends StatefulWidget {
 
 class _MainAdminScreenState extends State<MainAdminScreen> {
   int _index = 0;
+  late final List<Widget> _screens;
 
-  final _screens = const [
-    DashboardScreen(),
-    AdminModelesScreen(),
-    AdminCommandesScreen(),
-    AdminSurMesureScreen(),
-    AdminClientsScreen(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      DashboardScreen(onTabSwitch: (i) => setState(() => _index = i)),
+      const AdminModelesScreen(),
+      const AdminCommandesScreen(),
+      const AdminSurMesureScreen(),
+      const AdminClientsScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,30 +40,25 @@ class _MainAdminScreenState extends State<MainAdminScreen> {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view_outlined),
-            activeIcon: Icon(Icons.grid_view),
-            label: 'Dashboard',
-          ),
+              icon: Icon(Icons.grid_view_outlined),
+              activeIcon: Icon(Icons.grid_view),
+              label: 'Dashboard'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.checkroom_outlined),
-            activeIcon: Icon(Icons.checkroom),
-            label: 'Modèles',
-          ),
+              icon: Icon(Icons.checkroom_outlined),
+              activeIcon: Icon(Icons.checkroom),
+              label: 'Modèles'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag_outlined),
-            activeIcon: Icon(Icons.shopping_bag),
-            label: 'Commandes',
-          ),
+              icon: Icon(Icons.shopping_bag_outlined),
+              activeIcon: Icon(Icons.shopping_bag),
+              label: 'Commandes'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.water_drop_outlined),
-            activeIcon: Icon(Icons.water_drop),
-            label: 'Sur-Mesure',
-          ),
+              icon: Icon(Icons.water_drop_outlined),
+              activeIcon: Icon(Icons.water_drop),
+              label: 'Sur-Mesure'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.group_outlined),
-            activeIcon: Icon(Icons.group),
-            label: 'Clients',
-          ),
+              icon: Icon(Icons.group_outlined),
+              activeIcon: Icon(Icons.group),
+              label: 'Clients'),
         ],
       ),
     );

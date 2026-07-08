@@ -1,7 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/product_model.dart';
 
 class ProductsProvider extends ChangeNotifier {
+  static const _kExtrasKey = 'vc_products_extras_v1';
+  static const _kStatesKey = 'vc_products_states_v1';
+
+  static const _seededIds = {'p1', 'p2', 'p3', 'p4', 'p5'};
+
   final List<ProductModel> _products = [
     const ProductModel(
       id: 'p1',
@@ -103,15 +110,9 @@ class ProductsProvider extends ChangeNotifier {
   ];
 
   List<ProductModel> get products => List.unmodifiable(_products);
-
-  List<ProductModel> get activeProducts =>
-      _products.where((p) => p.isActive).toList();
-
-  List<ProductModel> get featuredProducts =>
-      activeProducts.take(4).toList();
-
-  List<ProductModel> get favoriteProducts =>
-      _products.where((p) => p.isFavorite).toList();
+  List<ProductModel> get activeProducts => _products.where((p) => p.isActive).toList();
+  List<ProductModel> get featuredProducts => activeProducts.take(4).toList();
+  List<ProductModel> get favoriteProducts => _products.where((p) => p.isFavorite).toList();
 
   List<ProductModel> byCategory(ProductCategory cat) =>
       activeProducts.where((p) => p.category == cat).toList();
@@ -119,12 +120,51 @@ class ProductsProvider extends ChangeNotifier {
   ProductModel? findById(String id) =>
       _products.where((p) => p.id == id).firstOrNull;
 
+  Future<void> loadSaved() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Restore isActive states for all products (including seeded)
+    final statesJson = prefs.getString(_kStatesKey);
+    if (statesJson != null) {
+      final states = json.decode(statesJson) as Map<String, dynamic>;
+      for (int i = 0; i < _products.length; i++) {
+        final active = states[_products[i].id];
+        if (active is bool) {
+          _products[i] = _products[i].copyWith(isActive: active);
+        }
+      }
+    }
+
+    // Load admin-added (non-seeded) products
+    final extrasJson = prefs.getString(_kExtrasKey);
+    if (extrasJson != null) {
+      final list = json.decode(extrasJson) as List;
+      for (final j in list) {
+        final p = ProductModel.fromJson(j as Map<String, dynamic>);
+        if (!_products.any((existing) => existing.id == p.id)) {
+          _products.add(p);
+        }
+      }
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> _save() async {
+    final prefs = await SharedPreferences.getInstance();
+    final states = <String, bool>{for (final p in _products) p.id: p.isActive};
+    await prefs.setString(_kStatesKey, json.encode(states));
+    final extras = _products
+        .where((p) => !_seededIds.contains(p.id))
+        .map((p) => p.toJson())
+        .toList();
+    await prefs.setString(_kExtrasKey, json.encode(extras));
+  }
+
   void toggleFavorite(String productId) {
     final idx = _products.indexWhere((p) => p.id == productId);
     if (idx != -1) {
-      _products[idx] = _products[idx].copyWith(
-        isFavorite: !_products[idx].isFavorite,
-      );
+      _products[idx] = _products[idx].copyWith(isFavorite: !_products[idx].isFavorite);
       notifyListeners();
     }
   }
@@ -132,20 +172,30 @@ class ProductsProvider extends ChangeNotifier {
   void toggleActive(String productId) {
     final idx = _products.indexWhere((p) => p.id == productId);
     if (idx != -1) {
-      _products[idx] = _products[idx].copyWith(
-        isActive: !_products[idx].isActive,
-      );
+      _products[idx] = _products[idx].copyWith(isActive: !_products[idx].isActive);
       notifyListeners();
+      _save();
     }
   }
 
   void addProduct(ProductModel product) {
     _products.add(product);
     notifyListeners();
+    _save();
+  }
+
+  void updateProduct(ProductModel updated) {
+    final idx = _products.indexWhere((p) => p.id == updated.id);
+    if (idx != -1) {
+      _products[idx] = updated;
+      notifyListeners();
+      _save();
+    }
   }
 
   void removeProduct(String productId) {
     _products.removeWhere((p) => p.id == productId);
     notifyListeners();
+    _save();
   }
 }
