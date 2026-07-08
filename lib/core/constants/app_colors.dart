@@ -26,7 +26,7 @@ class AppColors {
   static const Color divider     = Color(0xFF2A2A2A);
 
   // Badge colours
-  static const Color badgePrivé  = Color(0x33C9A84C);
+  static const Color badgePrive  = Color(0x33C9A84C);
   static const Color statusNew   = Color(0xFF1565C0);
   static const Color statusInProgress = Color(0xFF7B5800);
   static const Color statusDone  = Color(0xFF1B5E20);
