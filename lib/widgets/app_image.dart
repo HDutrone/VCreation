@@ -4,9 +4,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../core/constants/app_colors.dart';
 
 /// Renders local assets, device file paths, or remote URLs transparently.
+/// Defaults to [Alignment.topCenter] so portrait/fashion photos never crop heads.
 class AppImage extends StatelessWidget {
   final String imageUrl;
   final BoxFit fit;
+  final Alignment alignment;
   final Widget? placeholder;
   final Widget? errorWidget;
 
@@ -14,6 +16,7 @@ class AppImage extends StatelessWidget {
     super.key,
     required this.imageUrl,
     this.fit = BoxFit.cover,
+    this.alignment = Alignment.topCenter,
     this.placeholder,
     this.errorWidget,
   });
@@ -33,6 +36,7 @@ class AppImage extends StatelessWidget {
       return Image.asset(
         imageUrl,
         fit: fit,
+        alignment: alignment,
         errorBuilder: (_, __, ___) => _error,
       );
     }
@@ -41,12 +45,14 @@ class AppImage extends StatelessWidget {
       return Image.file(
         File(path),
         fit: fit,
+        alignment: alignment,
         errorBuilder: (_, __, ___) => _error,
       );
     }
     return CachedNetworkImage(
       imageUrl: imageUrl,
       fit: fit,
+      alignment: alignment,
       placeholder: (_, __) => _placeholder,
       errorWidget: (_, __, ___) => _error,
     );
