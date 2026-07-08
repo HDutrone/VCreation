@@ -1,0 +1,95 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [claude/flutter-ecommerce-app-DpTNL, main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build unsigned IPA
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.3'
+          channel: stable
+          cache: true
+
+      - name: Generate iOS platform files
+        run: flutter create --platforms ios --project-name vcreations .
+
+      - name: Configure iOS app name and permissions
+        run: |
+          python3 - << 'PYEOF'
+          import plistlib
+
+          path = 'ios/Runner/Info.plist'
+          with open(path, 'rb') as f:
+              plist = plistlib.load(f)
+
+          plist['CFBundleDisplayName'] = 'V Créations'
+          plist['NSPhotoLibraryUsageDescription'] = (
+              'V Créations utilise vos photos pour ajouter des images aux créations.')
+          plist['NSPhotoLibraryAddUsageDescription'] = (
+              'V Créations enregistre des photos dans votre galerie.')
+          plist['NSCameraUsageDescription'] = (
+              'V Créations utilise la caméra pour photographier vos créations.')
+
+          with open(path, 'wb') as f:
+              plistlib.dump(plist, f)
+
+          print("Info.plist updated — display name and permissions set.")
+          PYEOF
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate iOS app icon from logo
+        run: dart run flutter_launcher_icons
+
+      - name: Build iOS release (unsigned)
+        run: flutter build ios --release --no-codesign
+
+      - name: Package unsigned IPA
+        run: |
+          APP=build/ios/iphoneos/Runner.app
+          mkdir -p build/ios/Payload
+          cp -r "$APP" build/ios/Payload/Runner.app
+          cd build/ios
+          zip -r VCreations-unsigned.ipa Payload/
+          echo "IPA created: $(du -sh VCreations-unsigned.ipa | cut -f1)"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vcreations-unsigned-ipa
+          path: build/ios/VCreations-unsigned.ipa
+          retention-days: 30
+
+      - name: Installation instructions
+        run: |
+          echo "================================================"
+          echo "  IPA BUILD COMPLETE — UNSIGNED"
+          echo "================================================"
+          echo ""
+          echo "Pour installer sur iPhone (sans compte Apple Developer payant) :"
+          echo ""
+          echo "  Option 1 — AltStore (Mac ou PC)"
+          echo "    1. Installe AltServer sur ton Mac/PC"
+          echo "    2. Installe AltStore sur ton iPhone via AltServer"
+          echo "    3. Dans AltStore > My Apps > + > sélectionne VCreations-unsigned.ipa"
+          echo ""
+          echo "  Option 2 — Sideloadly (Mac ou PC)"
+          echo "    1. Télécharge Sideloadly sur sideloadly.io"
+          echo "    2. Connecte l'iPhone en USB"
+          echo "    3. Glisse le .ipa dans Sideloadly, connecte avec ton Apple ID"
+          echo ""
+          echo "  Note : signature gratuite valide 7 jours, à renouveler chaque semaine."
+          echo "  Pour un accès permanent → Apple Developer Program (99$/an) + TestFlight."
+          echo "================================================"
