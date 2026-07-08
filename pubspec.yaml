@@ -1,0 +1,39 @@
+name: vcreations
+description: V Créations Haute-Couture — Application Mobile Premium
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  url_launcher: ^6.2.6
+  cached_network_image: ^3.3.1
+  intl: ^0.19.0
+  shared_preferences: ^2.2.3
+  image_picker: ^1.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.jpg"
+  min_sdk_android: 21
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/images/models/modele1/
+    - assets/images/models/modele2/
+    - assets/images/models/modele3/
+    - assets/images/models/modele4/
+    - assets/images/models/modele5/
