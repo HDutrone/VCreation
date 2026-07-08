@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/product_model.dart';
 import '../../../providers/products_provider.dart';
+import '../../../widgets/app_image.dart';
 import '../../../widgets/gold_button.dart';
 import '../../../widgets/gold_divider.dart';
 
@@ -211,11 +212,24 @@ class _ModelRow extends StatelessWidget {
           // Thumbnail
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Container(
+            child: SizedBox(
               width: 60,
               height: 68,
-              color: AppColors.card,
-              child: const Icon(Icons.checkroom, color: AppColors.textMuted, size: 24),
+              child: product.imageUrls.isNotEmpty
+                  ? AppImage(
+                      imageUrl: product.imageUrls.first,
+                      fit: BoxFit.cover,
+                      errorWidget: Container(
+                        color: AppColors.card,
+                        child: const Icon(Icons.checkroom,
+                            color: AppColors.textMuted, size: 24),
+                      ),
+                    )
+                  : Container(
+                      color: AppColors.card,
+                      child: const Icon(Icons.checkroom,
+                          color: AppColors.textMuted, size: 24),
+                    ),
             ),
           ),
           const SizedBox(width: 14),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/product_model.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/cart_provider.dart';
 import '../../../providers/products_provider.dart';
+import '../../../widgets/app_image.dart';
 import '../sur_mesure/sur_mesure_screen.dart';
 
 class CollectionDetailScreen extends StatefulWidget {
@@ -78,11 +78,10 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  CachedNetworkImage(
+                  AppImage(
                     imageUrl: product.imageUrls[_selectedImage],
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(color: AppColors.card),
-                    errorWidget: (_, __, ___) => Container(
+                    errorWidget: Container(
                       color: AppColors.card,
                       child: Center(
                         child: Text(product.name,
@@ -144,12 +143,10 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                         ),
                       ),
                       clipBehavior: Clip.hardEdge,
-                      child: CachedNetworkImage(
+                      child: AppImage(
                         imageUrl: product.imageUrls[i],
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Container(color: AppColors.card),
-                        errorWidget: (_, __, ___) =>
-                            Container(color: AppColors.card),
+                        placeholder: Container(color: AppColors.card),
                       ),
                     ),
                   ),
@@ -362,12 +359,12 @@ class _FullScreenGalleryState extends State<_FullScreenGallery> {
         onPageChanged: (i) => setState(() => _page = i),
         itemCount: images.length,
         itemBuilder: (_, i) => InteractiveViewer(
-          child: CachedNetworkImage(
+          child: AppImage(
             imageUrl: images[i],
             fit: BoxFit.contain,
-            placeholder: (_, __) =>
-                const Center(child: CircularProgressIndicator(color: AppColors.gold)),
-            errorWidget: (_, __, ___) => Container(color: Colors.black12),
+            placeholder: const Center(
+                child: CircularProgressIndicator(color: AppColors.gold)),
+            errorWidget: Container(color: Colors.black12),
           ),
         ),
       ),

@@ -24,3 +24,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/images/models/modele1/
+    - assets/images/models/modele2/
+    - assets/images/models/modele3/
+    - assets/images/models/modele4/
+    - assets/images/models/modele5/

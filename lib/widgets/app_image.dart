@@ -1,0 +1,44 @@
+import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../core/constants/app_colors.dart';
+
+/// Renders a local asset or a remote URL transparently.
+class AppImage extends StatelessWidget {
+  final String imageUrl;
+  final BoxFit fit;
+  final Widget? placeholder;
+  final Widget? errorWidget;
+
+  const AppImage({
+    super.key,
+    required this.imageUrl,
+    this.fit = BoxFit.cover,
+    this.placeholder,
+    this.errorWidget,
+  });
+
+  bool get _isAsset => imageUrl.startsWith('assets/');
+
+  Widget get _placeholder =>
+      placeholder ?? Container(color: AppColors.card);
+
+  Widget get _error =>
+      errorWidget ?? Container(color: AppColors.card);
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isAsset) {
+      return Image.asset(
+        imageUrl,
+        fit: fit,
+        errorBuilder: (_, __, ___) => _error,
+      );
+    }
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: fit,
+      placeholder: (_, __) => _placeholder,
+      errorWidget: (_, __, ___) => _error,
+    );
+  }
+}

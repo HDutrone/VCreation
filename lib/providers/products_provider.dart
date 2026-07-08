@@ -5,80 +5,100 @@ class ProductsProvider extends ChangeNotifier {
   final List<ProductModel> _products = [
     const ProductModel(
       id: 'p1',
-      name: 'Nuit Étoilée',
-      subtitle: 'Robe Haute Couture',
+      name: 'Brume Turquoise',
+      subtitle: 'Ensemble Haute Couture',
       description:
-          'Création en franges noires superposées, travail artisanal minutieux '
-          'réalisé entièrement à la main. Inspirée du jazz de l\'ère Art Déco, '
-          'cette pièce unique allie élégance structurée et mouvement perpétuel.',
-      category: ProductCategory.robe,
-      badge: ProductBadge.pieceSignature,
+          'Robe courte en broderie anglaise turquoise, ceinturée d\'un nœud satiné. '
+          'Finitions impeccables révélant un savoir-faire artisanal unique. '
+          'Quatre vues pour découvrir chaque détail de cette pièce aérienne.',
+      category: ProductCategory.ensemble,
+      badge: ProductBadge.surMesureDispo,
       imageUrls: [
-        'https://picsum.photos/seed/nuit1/800/1000',
-        'https://picsum.photos/seed/nuit2/800/1000',
+        'assets/images/models/modele1/photo1.jpg',
+        'assets/images/models/modele1/photo2.jpg',
+        'assets/images/models/modele1/photo3.jpg',
+        'assets/images/models/modele1/photo4.jpg',
       ],
-      viewCount: 86,
+      viewCount: 74,
     ),
     const ProductModel(
       id: 'p2',
-      name: 'Lagon Bleu',
-      subtitle: 'Kaftan Haute Couture',
+      name: 'Flamme Wax',
+      subtitle: 'Robe Haute Couture',
       description:
-          'Kaftan fluide à imprimé aquarelle, façonné dans un satin de soie '
-          'premium. Trois vues pour révéler son amplitude en mouvement.',
-      category: ProductCategory.kaftan,
+          'Longue robe rouge ornée d\'appliqués circulaires en tissu wax multicolore. '
+          'Mélange audacieux des traditions couture et du patrimoine africain. '
+          'Six angles pour révéler toute la richesse de cette création unique.',
+      category: ProductCategory.robe,
       badge: ProductBadge.surMesureDispo,
       imageUrls: [
-        'https://picsum.photos/seed/lagon1/800/1000',
-        'https://picsum.photos/seed/lagon2/800/1000',
-        'https://picsum.photos/seed/lagon3/800/1000',
+        'assets/images/models/modele2/photo1.jpg',
+        'assets/images/models/modele2/photo2.jpg',
+        'assets/images/models/modele2/photo3.jpg',
+        'assets/images/models/modele2/photo4.jpg',
+        'assets/images/models/modele2/photo5.jpg',
+        'assets/images/models/modele2/photo6.jpg',
       ],
-      viewCount: 98,
+      viewCount: 112,
     ),
     const ProductModel(
       id: 'p3',
-      name: 'Soleil Rouge',
-      subtitle: 'Robe Haute Couture',
+      name: 'Nuit Étoilée',
+      subtitle: 'Robe de Soirée',
       description:
-          'Robe soleil aux teintes enflammées, taillée dans une mousseline '
-          'légère aux reflets iridescents. Une silhouette libre qui célèbre '
-          'la femme dans toute sa splendeur.',
+          'Robe de soirée en franges noires superposées, travail artisanal minutieux '
+          'réalisé entièrement à la main. Inspirée du jazz de l\'ère Art Déco, '
+          'cette pièce signature allie élégance structurée et mouvement perpétuel.',
       category: ProductCategory.robe,
       badge: ProductBadge.pieceSignature,
       imageUrls: [
-        'https://picsum.photos/seed/soleil1/800/1000',
+        'assets/images/models/modele3/photo1.jpg',
+        'assets/images/models/modele3/photo2.jpg',
+        'assets/images/models/modele3/photo3.jpg',
+        'assets/images/models/modele3/photo4.jpg',
+        'assets/images/models/modele3/photo5.jpg',
+        'assets/images/models/modele3/photo6.jpg',
+        'assets/images/models/modele3/photo7.jpg',
+        'assets/images/models/modele3/photo8.jpg',
+        'assets/images/models/modele3/photo9.jpg',
       ],
-      viewCount: 64,
+      viewCount: 186,
     ),
     const ProductModel(
       id: 'p4',
-      name: 'Harmonie',
-      subtitle: 'Kaftan Haute Couture',
+      name: 'Aube Impériale',
+      subtitle: 'Robe Haute Couture',
       description:
-          'Collection trio de kaftans en soieries imprimées. Trois silhouettes, '
-          'trois récits, une harmonie parfaite. Disponible en ensemble ou en '
-          'pièce individuelle.',
-      category: ProductCategory.kaftan,
-      badge: ProductBadge.surMesureDispo,
+          'Création spectaculaire dorée et verte aux épaules sculptées en papillon. '
+          'Broderies impériales à la main, pièce unique de haute couture d\'exception. '
+          'Une silhouette royale qui incarne l\'essence même du luxe africain.',
+      category: ProductCategory.robe,
+      badge: ProductBadge.pieceSignature,
       imageUrls: [
-        'https://picsum.photos/seed/harmonie1/800/1000',
+        'assets/images/models/modele4/photo1.jpg',
+        'assets/images/models/modele4/photo2.jpg',
+        'assets/images/models/modele4/photo3.jpg',
+        'assets/images/models/modele4/photo4.jpg',
       ],
-      viewCount: 42,
+      viewCount: 93,
     ),
     const ProductModel(
       id: 'p5',
-      name: 'Aube Dorée',
-      subtitle: 'Tailleur Haute Couture',
+      name: 'Soleil d\'Or',
+      subtitle: 'Ensemble Haute Couture',
       description:
-          'Tailleur structuré en brocart doré, lignes épurées et finitions '
-          'couture. La quintessence du style corporate d\'exception.',
-      category: ProductCategory.tailleur,
+          'Ensemble deux-pièces en broderie anglaise jaune ensoleillée, '
+          'manches cascades à volants superposés. Légèreté et féminité à l\'état pur. '
+          'Une création lumineuse qui célèbre la femme dans toute sa splendeur.',
+      category: ProductCategory.ensemble,
       badge: ProductBadge.nouveaute,
       imageUrls: [
-        'https://picsum.photos/seed/aube1/800/1000',
-        'https://picsum.photos/seed/aube2/800/1000',
+        'assets/images/models/modele5/photo1.jpg',
+        'assets/images/models/modele5/photo2.jpg',
+        'assets/images/models/modele5/photo3.jpg',
+        'assets/images/models/modele5/photo4.jpg',
       ],
-      viewCount: 23,
+      viewCount: 58,
     ),
   ];
 

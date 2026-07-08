@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/product_model.dart';
 import '../../../providers/products_provider.dart';
+import '../../../widgets/app_image.dart';
 import 'collection_detail_screen.dart';
 
 class CollectionsScreen extends StatefulWidget {
@@ -147,11 +147,10 @@ class _CollectionCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  CachedNetworkImage(
+                  AppImage(
                     imageUrl: product.imageUrls.first,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(color: AppColors.card),
-                    errorWidget: (_, __, ___) => _colorBlock(product),
+                    errorWidget: _colorBlock(product),
                   ),
                   Positioned(
                     top: 10,

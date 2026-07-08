@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/products_provider.dart';
+import '../../../widgets/app_image.dart';
 import '../collections/collection_detail_screen.dart';
 
 class FavoritesScreen extends StatelessWidget {
@@ -57,14 +57,10 @@ class FavoritesScreen extends StatelessWidget {
                       Expanded(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: CachedNetworkImage(
+                          child: AppImage(
                             imageUrl: p.imageUrls.first,
                             fit: BoxFit.cover,
-                            width: double.infinity,
-                            placeholder: (_, __) =>
-                                Container(color: AppColors.card),
-                            errorWidget: (_, __, ___) =>
-                                Container(color: AppColors.card),
+                            placeholder: Container(color: AppColors.card),
                           ),
                         ),
                       ),

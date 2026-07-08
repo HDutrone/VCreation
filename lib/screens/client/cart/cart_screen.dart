@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/cart_item_model.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/cart_provider.dart';
+import '../../../widgets/app_image.dart';
 import '../../../widgets/gold_button.dart';
 import '../../../widgets/gold_divider.dart';
 import '../../auth/login_screen.dart';
@@ -97,11 +97,11 @@ class _CartItemCard extends StatelessWidget {
             child: SizedBox(
               width: 80,
               height: 90,
-              child: CachedNetworkImage(
+              child: AppImage(
                 imageUrl: item.product.imageUrls.first,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => Container(color: AppColors.card),
-                errorWidget: (_, __, ___) => Container(
+                placeholder: Container(color: AppColors.card),
+                errorWidget: Container(
                   color: AppColors.card,
                   child: const Icon(Icons.image_not_supported_outlined,
                       color: AppColors.textMuted, size: 28),
