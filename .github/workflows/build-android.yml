@@ -30,40 +30,34 @@ jobs:
       - name: Generate Android platform files
         run: flutter create --platforms android --project-name vcreations .
 
-      - name: Configure Android manifest for url_launcher
+      - name: Configure Android manifest
         run: |
-          cat >> android/app/src/main/AndroidManifest.xml << 'MANIFEST'
-          MANIFEST
           python3 - << 'PYEOF'
-          import re
-
           path = 'android/app/src/main/AndroidManifest.xml'
           with open(path, 'r') as f:
               content = f.read()
 
-          permissions_block = """
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32"/>
-"""
+          permissions = (
+              '    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n'
+              '    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"'
+              ' android:maxSdkVersion="32"/>\n'
+          )
 
-          queries_block = """
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="https" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="whatsapp" />
-        </intent>
-    </queries>
-"""
+          queries = (
+              '    <queries>\n'
+              '        <intent>\n'
+              '            <action android:name="android.intent.action.VIEW" />\n'
+              '            <data android:scheme="https" />\n'
+              '        </intent>\n'
+              '        <intent>\n'
+              '            <action android:name="android.intent.action.VIEW" />\n'
+              '            <data android:scheme="whatsapp" />\n'
+              '        </intent>\n'
+              '    </queries>\n'
+          )
 
-          # Insert permissions before <application
-          content = content.replace('<application', permissions_block + '\n    <application', 1)
-          # Insert queries before </manifest>
-          content = content.replace('</manifest>', queries_block + '\n</manifest>')
+          content = content.replace('<application', permissions + '\n    <application', 1)
+          content = content.replace('</manifest>', queries + '\n</manifest>')
 
           with open(path, 'w') as f:
               f.write(content)
