@@ -71,12 +71,7 @@ jobs:
           if [ -f "$STRINGS" ]; then
             sed -i 's|<string name="app_name">vcreations</string>|<string name="app_name">V Créations</string>|' "$STRINGS"
           else
-            cat > "$STRINGS" << 'XML'
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">V Créations</string>
-</resources>
-XML
+            printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <string name="app_name">V Créations</string>\n</resources>\n' > "$STRINGS"
           fi
           echo "strings.xml:"
           cat "$STRINGS"
